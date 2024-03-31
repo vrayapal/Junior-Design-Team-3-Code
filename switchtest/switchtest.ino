@@ -1,6 +1,6 @@
 #include <ezButton.h>
 
-ezButton limitSwitch(22);
+ezButton limitSwitch(7);
 
 void setup() {
   Serial.begin(9600);

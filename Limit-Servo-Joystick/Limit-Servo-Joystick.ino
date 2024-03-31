@@ -4,16 +4,16 @@
 ezButton limitSwitch(22);
 Servo myservo;
 
-int pos = 0;
-int xPin = A1;
-int yPin = A0;
-int buttonPin = 2;
+int pos = 0;        // variable for servo position
+int xPin = A1;      // variable for joystick pin
+int yPin = A0;      // variable for joystick pin
+int buttonPin = 2;  // variable for button pin
 
-int xPosition = 0;
-int yPosition = 0;
-int buttonState = 0;
+int xPosition = 0;      //position in the x for the joystick
+int yPosition = 0;      //position in the y for the joystick
+int buttonState = 0;    //position of the button for the joystick
 
-void limit(){
+void limit(){         // 
   limitSwitch.loop();
 
   if(limitSwitch.isReleased())
@@ -23,10 +23,12 @@ void limit(){
     Serial.println("The limit switch: TOUCHED -> UNTOUCHED");
 
   int state = limitSwitch.getState();
-  /*if(state == LOW)
+  /*
+  if(state == LOW)
     Serial.println("The limit switch: UNTOUCHED");
   else
-    Serial.println("The limit switch: TOUCHED");*/
+    Serial.println("The limit switch: TOUCHED");
+  */
 }
 
 void joystick() {
