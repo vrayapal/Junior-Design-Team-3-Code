@@ -5,8 +5,10 @@ ezButton limitSwitch(22);
 Servo myservo;
 
 int pos = 0;        // variable for servo position
+
 int xPin = A1;      // variable for joystick pin
 int yPin = A0;      // variable for joystick pin
+
 int buttonPin = 2;  // variable for button pin
 
 int xPosition = 0;      //position in the x for the joystick

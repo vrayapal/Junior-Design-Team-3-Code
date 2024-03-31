@@ -19,6 +19,46 @@ int gripper_closed = 0;     // servo value at which the servo is closed
 int gripper_open = 90;      // servo value at which the servo is closed
 int color = 0;              // Initialises variable to hold the color value fromt eh color sensor
 
+// Joystick 1 Variables
+int x1Pin = A1;      // variable for joystick pin
+int y1Pin = A0;      // variable for joystick pin
+int buttonPin1 = 2;  // variable for button pin
+
+float xPosition1 = 0;      //position in the x for the joystick
+float yPosition1 = 0;      //position in the y for the joystick
+int buttonState1 = 0;    //position of the button for the joystick
+
+// Joystick 2 Variables
+int x2Pin = A3;      // variable for joystick pin
+int y2Pin = A2;      // variable for joystick pin
+int buttonPin2 = 2;  // variable for button pin
+
+float xPosition2 = 0;      //position in the x for the joystick
+float yPosition2 = 0;      //position in the y for the joystick
+int buttonState2 = 0;    //position of the button for the joystick
+
+
+
+void joystick() {
+  xPosition1 = (((analogRead(x1Pin))-511)/512);   // normalized x position from -1 to 1 for joystick 1
+  yPosition1 = (((analogRead(y1Pin))-511)/512);   // normalized y position from -1 to 1 for joystick 1
+  buttonState1 = digitalRead(buttonPin1);
+  
+  xPosition2 = (((analogRead(x2Pin))-511)/512);   // normalized x position from -1 to 1 for joystick 2
+  yPosition2 = (((analogRead(y2Pin))-511)/512);   // normalized y position from -1 to 1 for joystick 2
+  buttonState2 = digitalRead(buttonPin2);
+  
+  /* Debug Stuff
+  if(buttonState == 0){
+    Serial.print("X: ");
+    Serial.print(xPosition);
+    Serial.print(" | Y: ");
+    Serial.print(yPosition);
+    Serial.print(" | Button: ");
+    Serial.println(buttonState);
+  }
+  */
+}
 
 void limit(){               // limit switch function for limit switches. To add more add another limit do the following: add a block in this function; intialize 'limit4' above; set debounce time in setup
 
@@ -92,10 +132,29 @@ void setup() {
 
 void loop() {
   limit();
+  /* Debug for limit switchs
   Serial.print(limit1);
   Serial.print(limit2);
   Serial.println(limit3);
-
+  */
+  joystick()
+  if(buttonState1 == 0){
+    Serial.print("X1: ");
+    Serial.print(xPosition1);
+    Serial.print(" | Y1: ");
+    Serial.print(yPosition1);
+    Serial.print(" | Button1: ");
+    Serial.println(buttonState1);
+  }
+  if(buttonState2 == 0){
+    Serial.print("X2: ");
+    Serial.print(xPosition2);
+    Serial.print(" | Y2: ");
+    Serial.print(yPosition2);
+    Serial.print(" | Button2: ");
+    Serial.println(buttonState2);
+  }
   // gripper()
   // exit()
 }
+
