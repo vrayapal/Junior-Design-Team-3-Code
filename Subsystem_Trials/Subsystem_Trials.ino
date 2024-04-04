@@ -1,9 +1,9 @@
 #include <Servo.h>
 #include <ezButton.h>
 
-ezButton limitSwitch1(7);
-ezButton limitSwitch2(6);
-ezButton limitSwitch3(5);
+ezButton limitSwitch1(23);
+ezButton limitSwitch2(25);
+ezButton limitSwitch3(27);
 
 Servo gripper_servo;
 
@@ -19,12 +19,18 @@ int gripper_closed = 0;     // servo value at which the servo is closed
 int gripper_open = 90;      // servo value at which the servo is closed
 int color = 0;              // Initialises variable to hold the color value fromt eh color sensor
 
+//Stepper Test
+int stepPin = 5; 
+int dirPin = 4; 
+int enPin = 6;
+int StepperSpeed = 500;
+
 
 void limit(){               // limit switch function for limit switches. To add more add another limit do the following: add a block in this function; intialize 'limit4' above; set debounce time in setup
 
   limitSwitch1.loop();
   limit1 = limitSwitch1.getState();
-    if(limit1 == true )
+    if(limit1 == true)
       limit1 = true;
       //code to scoot robot away from limit switch 
     else if(limit1 == false)
@@ -67,20 +73,23 @@ void gripper(){                       // function to actuate gripper from open t
 
 /*
 void color (){
-  if ((colorsensorvalue>= 0) && (colorsensorvalue<= 1))
-    color=0;
+  if          ((myColor.getCIEx()>= 0) && (myColor.getCIEx()<= 1) && (myColor.getCIEy()>= 0) && (myColor.getCIEy()<= 1))
+    color = 0;
     Serial.println("Block is Blue");
-  else if ((colorsensorvalue>= 2) && (colorsensorvalue<= 3))
-    color=1;
+  else if     ((myColor.getCIEx()>= 2) && (myColor.getCIEx()<= 3) && (myColor.getCIEy()>= 2) && (myColor.getCIEy()<= 3))
+    color = 1;
     Serial.println("Block is Green");
-  else if ((colorsensorvalue>= 4) && (colorsensorvalue<= 5))
-    color=2;
+  else if     ((myColor.getCIEx()>= 4) && (myColor.getCIEx()<= 5) && (myColor.getCIEy()>= 4) && (myColor.getCIEy()<= 5))
+    color = 2;
     Serial.println("Block is Red");
   else 
       Serial.println("Color not detected");
 }
 */
 
+void stepper1(){               // limit switch function for limit switches. To add more add another limit do the following: add a block in this function; intialize 'limit4' above; set debounce time in setup
+  
+}
 
 void setup() {
   Serial.begin(9600);
@@ -88,6 +97,17 @@ void setup() {
   limitSwitch2.setDebounceTime(50);
   limitSwitch3.setDebounceTime(50);
 
+  //Color Sensor Setup 
+  /*
+  Serial.println("OPT4048 Example 1 Basic Color Sensing.");
+  Wire.begin();
+  if (!myColor.begin()) {
+      Serial.println("OPT4048 not detected- check wiring or that your I2C address is correct!");
+      while (1);
+  }
+    myColor.setBasicSetup();
+    Serial.println("Ready to go!");
+  */
 }
 
 void loop() {

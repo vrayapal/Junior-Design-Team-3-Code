@@ -1,8 +1,11 @@
 int stepPin = 5; 
 int dirPin = 4; 
 int enPin = 6;
+int StepperSpeed = 500;
+
 
 void setup() {
+  Serial.begin(9600);
   pinMode(stepPin,OUTPUT); 
   pinMode(dirPin,OUTPUT);
   pinMode(enPin,OUTPUT);
@@ -12,19 +15,21 @@ void setup() {
 
 void loop() {
   digitalWrite(dirPin,HIGH); // Enables the motor to move in a particular direction
-  for(int x = 0; x < 200; x++) {
+  for(int x = 0; x < 800; x++) {
+    Serial.println("High");
     digitalWrite(stepPin,HIGH); 
-    delayMicroseconds(500); 
+    delayMicroseconds(StepperSpeed);
     digitalWrite(stepPin,LOW); 
-    delayMicroseconds(500); 
+    delayMicroseconds(StepperSpeed); 
   }
   delay(1000); // One second delay
   digitalWrite(dirPin,LOW); //Changes the direction of rotation
-  for(int x = 0; x < 200; x++) {
+  for(int x = 0; x < 800; x++) {
+    Serial.println("Low");
     digitalWrite(stepPin,HIGH);
-    delayMicroseconds(500);
+    delayMicroseconds(StepperSpeed);
     digitalWrite(stepPin,LOW);
-    delayMicroseconds(500);
+    delayMicroseconds(StepperSpeed);
   }
   delay(1000); 
 }

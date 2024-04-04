@@ -2,23 +2,29 @@
 
 Servo myservo;
 
-int pos = 0;
+int pos = 100;
+
+int max = 120;
+int min = 20;
+int speed = 15; // smaller is faster
 
 void setup() {
-  myservo.attach(9);
+  Serial.begin(9600);
+  myservo.attach(9); //PWM
 }
 
 void loop() {
-  for (pos = 0; pos <= 180; pos += 1) { 
+  for (pos = min; pos <= max; pos += 1) { 
     myservo.write(pos);
-    delay(15);
-    if (pos==0 || pos== 90 || pos == 180) {
-      delay(750);
+    Serial.println(pos);
+    delay(speed);
     }
-  }
-  for (pos = 180; pos >= 0; pos -= 1) {
+  for (pos = max; pos >= min; pos -= 1) {
     myservo.write(pos);
-    delay(15);
+    Serial.println(pos);
+    delay(speed);
+    if(pos==min)
+      delay(2000);
   }
   //myservo.write(150);
 }
