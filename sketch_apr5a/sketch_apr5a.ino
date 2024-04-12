@@ -18,6 +18,7 @@ int enPin = 6;
 int StepperSpeed = 500;
 */
 
+
 //Limit Switch Variables
 bool limit1 = false;
 bool limit2 = false;
@@ -29,9 +30,9 @@ bool RightButton = false;
 
 // Gripper Variables
 Servo gripper_servo;
-int gripper_pos = 80;        // variable for servo position
+int gripper_pos = 100;        // variable for servo position
 bool gripper_state = false; // Initializes in the open state
-int gripper_closed = -20;     // servo value at which the servo is closed 
+int gripper_closed = 20;     // servo value at which the servo is closed 
 int speed = 8; // smaller is faster
 int gripper_open = 120;      // servo value at which the servo is closed
 int color = 0;              // Initialises variable to hold the color value fromt eh color sensor
@@ -63,9 +64,6 @@ const int MOTOR1_DIRECTION_PIN = 4; // Yellow
 
 const int MOTOR2_STEP_PIN = 7; // Purple
 const int MOTOR2_DIRECTION_PIN = 6; // Yellow
-const int ENA_PIN = 38; // Brown
-
-float position = 100.0;
 
 bool grip = true; // true is closed // false is closed 
 
@@ -74,12 +72,12 @@ SpeedyStepper stepper1;
 SpeedyStepper stepper2;
 
 void joystick() {
-  xPosition1 = (analogRead(x1Pin)-511);   // normalized x position from -1 to 1 for joystick 1
-  yPosition1 = (analogRead(y1Pin)-511);   // normalized y position from -1 to 1 for joystick 1
+  xPosition1 = map(analogRead(x1Pin),0,1023,-1,1);   // normalized x position from -1 to 1 for joystick 1
+  yPosition1 = map(analogRead(y1Pin),0,1023,-1,1);   // normalized y position from -1 to 1 for joystick 1
   buttonState1 = digitalRead(buttonPin1);
 
-  xPosition2 = (analogRead(x2Pin)-511);   // normalized x position from -1 to 1 for joystick 2
-  yPosition2 = (analogRead(y2Pin)-511);   // normalized y position from -1 to 1 for joystick 2
+  xPosition2 = map(analogRead(x2Pin),0,1023,-1,1);   // normalized x position from -1 to 1 for joystick 2
+  yPosition2 = map(analogRead(y2Pin),0,1023,-1,1);   // normalized y position from -1 to 1 for joystick 2
   buttonState2 = digitalRead(buttonPin2);
   
   // Debug Stuff
@@ -88,7 +86,7 @@ void joystick() {
     Serial.print(xPosition1);
     Serial.print(" | Y: ");
     Serial.print(yPosition1);
-    Serial.print(" | ButtonR: ");
+    Serial.print(" | Button: ");
     Serial.println(buttonState1);
   }
   if(buttonState2 == 0){
@@ -96,7 +94,7 @@ void joystick() {
     Serial.print(xPosition2);
     Serial.print(" | Y: ");
     Serial.print(yPosition2);
-    Serial.print(" | ButtonL: ");
+    Serial.print(" | Button: ");
     Serial.println(buttonState2);
   }
 }
@@ -202,7 +200,7 @@ void homeLA (){
   stepperLA.setStepsPerMillimeter(40 * 4);
   stepperLA.setSpeedInMillimetersPerSecond(26);
   stepperLA.setAccelerationInMillimetersPerSecondPerSecond(50.0);
-  stepperLA.moveToPositionInMillimeters(-5.0*10);
+  stepperLA.moveToPositionInMillimeters(-10.0*10);
   //delay(5000);
 }
 
@@ -211,13 +209,9 @@ void home1 (){
   float maxHomingDistanceInMM = 720;   // since my lead-screw is 38cm long, should never move more than that
   int directionTowardHome = 1;        // direction to move toward limit switch: 1 goes positive direction, -1 backward
   
-  digitalWrite(ENA_PIN, HIGH);
-  
   Serial.println("Stepper 1");
   stepper1.moveToHomeInSteps(directionTowardHome, homingSpeedInStepsPerSec, maxHomingDistanceInMM, 25);
   
-  digitalWrite(ENA_PIN, LOW);
-
   homingSpeedInStepsPerSec = 50.0*2;
   maxHomingDistanceInMM = 720;
   directionTowardHome = 1;
@@ -258,8 +252,6 @@ void setup() {
   stepperLA.connectToPins(MOTORLA_STEP_PIN, MOTORLA_DIRECTION_PIN);
   stepper1.connectToPins(MOTOR1_STEP_PIN, MOTOR1_DIRECTION_PIN);
   stepper2.connectToPins(MOTOR2_STEP_PIN, MOTOR2_DIRECTION_PIN);
-  pinMode(ENA_PIN, OUTPUT);
-
 
   //stepper23.setStepsPerMillimeter(40 * 1);
   //stepper23.setSpeedInMillimetersPerSecond(30.0);
@@ -295,6 +287,10 @@ void loop() {
   //gripper();
   //Serial.println("done");
 
+  d=d+1;
+  //Serial.print("d: ");
+  //Serial.println(d);
+
 
   stepperLA.setSpeedInMillimetersPerSecond(10.0);
   stepperLA.setAccelerationInMillimetersPerSecondPerSecond(10.0);
@@ -302,47 +298,20 @@ void loop() {
   homeLA();
 
   home1();
-  /*
-  stepperLA.setSpeedInStepsPerSecond(100);
-  stepperLA.setAccelerationInStepsPerSecondPerSecond(100);
 
-  stepperLA.setCurrentPositionInSteps(0);
-  bool stopFlag = false;
-
-
-  //
-  // setup the motor so that it will rotate 2000 steps, note: this 
-  // command does not start moving yet
-  //
-  stepperLA.setupMoveInSteps(2000);
-  
-  // now execute the move, looping until the motor has finished
-  //
-  while(!stepperLA.motionComplete()) {
-    
-    // Note: The code added to this loop must execute VERY fast.  
-    // Perhaps no longer than 0.05 milliseconds.
-    joystick();
-    if (xPosition1 >=100){
-      stepperLA.setupMoveInSteps(2000);
-    }
-    else if (xPosition1 <=-100){
-      stepperLA.setupMoveInSteps(-2000);
-    }
-    // process motor steps
-    stepperLA.processMovement();
-
-    // check if the user has pressed the "Stop" button, if so decelerate to a stop
-    if ((xPosition2 >=100) && (xPosition2 <=-100)) {
-      stepperLA.setupStop();
-      stopFlag = true;
-    }
-  }
-  */
   while(true){
     joystick();
-    limit();
     buttons();
+    if (yPosition1 >=0.15){
+      stepperLA.setSpeedInStepsPerSecond(8000*4);
+      stepperLA.setAccelerationInStepsPerSecondPerSecond(10000*2);
+      stepperLA.moveRelativeInSteps(-50*4);
+    }
+    else if (yPosition1 <=-0.15){
+      stepperLA.setSpeedInStepsPerSecond(8000*4);
+      stepperLA.setAccelerationInStepsPerSecondPerSecond(10000*2);
+      stepperLA.moveRelativeInSteps(50*4);
+    }
     if (LeftButton == false){
       gripper_state=false;
       gripper();
@@ -351,53 +320,26 @@ void loop() {
       gripper_state=true;
       gripper();
     }
-    if (yPosition1 >=100){
-      stepperLA.setSpeedInStepsPerSecond(8000);
-      stepperLA.setAccelerationInStepsPerSecondPerSecond(10000);
-      stepperLA.moveRelativeInSteps(-50);
+  if (xPosition2 >=0.15){
+      stepper1.setSpeedInStepsPerSecond(800);
+      stepper1.setAccelerationInStepsPerSecondPerSecond(10000);
+      stepper1.moveRelativeInSteps(-15);
     }
-    else if (yPosition1 <=-100){
-      stepperLA.setSpeedInStepsPerSecond(8000);
-      stepperLA.setAccelerationInStepsPerSecondPerSecond(10000);
-      stepperLA.moveRelativeInSteps(50);
-    }
-    if (xPosition2 >=100){
-        stepper1.setSpeedInStepsPerSecond(800);
-        stepper1.setAccelerationInStepsPerSecondPerSecond(10000);
-        stepper1.moveRelativeInSteps(-15);
-        position = stepper1.getCurrentPositionInRevolutions();
-        Serial.print("Position RA1: ");
-        Serial.println(position);
-        joystick();
-      }
-    else if (xPosition2 <=-100){
+    else if (xPosition2 <=-0.15){
       stepper1.setSpeedInStepsPerSecond(80);
       stepper1.setAccelerationInStepsPerSecondPerSecond(1000);
       stepper1.moveRelativeInSteps(15);
-      position = stepper1.getCurrentPositionInRevolutions();
-      Serial.print("Position RA1: ");
-      Serial.println(position);
-      joystick();
     }
-    if (yPosition2 >=100){
+  if (yPosition2 >=0.15){
       stepper2.setSpeedInStepsPerSecond(80*2);
       stepper2.setAccelerationInStepsPerSecondPerSecond(1000*2);
       stepper2.moveRelativeInSteps(-15*4);
-      position = stepper2.getCurrentPositionInRevolutions();
-      Serial.print("Position RA2: ");
-      Serial.println(position);
-      joystick();
     }
-    else if (yPosition2 <=-100){
+    else if (yPosition2 <=-0.15){
       stepper2.setSpeedInStepsPerSecond(80*2);
       stepper2.setAccelerationInStepsPerSecondPerSecond(1000*2);
       stepper2.moveRelativeInSteps(15*4);
-      position = stepper2.getCurrentPositionInRevolutions();
-      Serial.print("Position RA2: ");
-      Serial.println(position);
-      joystick();
     }
   }
 }
-
 

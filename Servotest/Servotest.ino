@@ -4,13 +4,13 @@ Servo myservo;
 
 int pos = 100;
 
-int max = 120;
-int min = 20;
+int max = 80;
+int min = -20;
 int speed = 15; // smaller is faster
 
 void setup() {
   Serial.begin(9600);
-  myservo.attach(9); //PWM
+  myservo.attach(12); //PWM
 }
 
 void loop() {
