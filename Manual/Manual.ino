@@ -275,26 +275,6 @@ void loop() {
   */
   joystick();
   buttons();
-  /*if(buttonState1 == 0){
-    Serial.print("X1: ");
-    Serial.print(xPosition1);
-    Serial.print(" | Y1: ");
-    Serial.print(yPosition1);
-    Serial.print(" | Button1: ");
-    Serial.println(buttonState1);
-  }
-  if(buttonState2 == 0){
-    Serial.print("X2: ");
-    Serial.print(xPosition2);
-    Serial.print(" | Y2: ");
-    Serial.print(yPosition2);
-    Serial.print(" | Button2: ");
-    Serial.println(buttonState2);
-  }*/
-
-  //gripper();
-  //Serial.println("done");
-
 
   stepperLA.setSpeedInMillimetersPerSecond(10.0);
   stepperLA.setAccelerationInMillimetersPerSecondPerSecond(10.0);
@@ -302,43 +282,7 @@ void loop() {
   homeLA();
 
   home1();
-  /*
-  stepperLA.setSpeedInStepsPerSecond(100);
-  stepperLA.setAccelerationInStepsPerSecondPerSecond(100);
-
-  stepperLA.setCurrentPositionInSteps(0);
-  bool stopFlag = false;
-
-
-  //
-  // setup the motor so that it will rotate 2000 steps, note: this 
-  // command does not start moving yet
-  //
-  stepperLA.setupMoveInSteps(2000);
   
-  // now execute the move, looping until the motor has finished
-  //
-  while(!stepperLA.motionComplete()) {
-    
-    // Note: The code added to this loop must execute VERY fast.  
-    // Perhaps no longer than 0.05 milliseconds.
-    joystick();
-    if (xPosition1 >=100){
-      stepperLA.setupMoveInSteps(2000);
-    }
-    else if (xPosition1 <=-100){
-      stepperLA.setupMoveInSteps(-2000);
-    }
-    // process motor steps
-    stepperLA.processMovement();
-
-    // check if the user has pressed the "Stop" button, if so decelerate to a stop
-    if ((xPosition2 >=100) && (xPosition2 <=-100)) {
-      stepperLA.setupStop();
-      stopFlag = true;
-    }
-  }
-  */
   while(true){
     limit();
     joystick();

@@ -310,8 +310,6 @@ void loop() {
   stepperLA.setStepsPerMillimeter(40 * 4); // times 4x microstepping
   stepperLA.setSpeedInMillimetersPerSecond(26);
   stepperLA.setAccelerationInMillimetersPerSecondPerSecond(50.0);
-
-
   
   stepper1.setStepsPerRevolution(200*8); // times 8x microstepping
   stepper1.setSpeedInRevolutionsPerSecond(1.0);
@@ -321,37 +319,39 @@ void loop() {
   stepper2.setSpeedInRevolutionsPerSecond(1.0);
   stepper2.setAccelerationInRevolutionsPerSecondPerSecond(1.0);
   
-  homeLA();
+  if (LeftButton == false){
+    homeLA();
+    home1();
+    for (int i = 0; i <= 8; i++) {
+      stepperLA.moveToPositionInMillimeters(zlocations[0]);
+      stepper1.moveToPositionInRevolutions(startlocations[i][0]);
+      stepper2.moveToPositionInRevolutions(startlocations[i][1]);
+      gripper();
+      safe();
+      //color();
+      if (color = 0){           // Blue
+        stepperLA.moveToPositionInMillimeters(caselocations[blue][2]);
+        stepper1.moveToPositionInRevolutions(caselocations[blue][0]);
+        stepper2.moveToPositionInRevolutions(caselocations[blue][1]);
+        blue++;
+      }
+      else if (color = 1){      // Red
+        stepperLA.moveToPositionInMillimeters(caselocations[red][2]);
+        stepper1.moveToPositionInRevolutions(caselocations[red][0]);
+        stepper2.moveToPositionInRevolutions(caselocations[red][1]);
+        red++;
+      }
+      else if(color = 2){       // Green
+        stepperLA.moveToPositionInMillimeters(caselocations[green][2]);
+        stepper1.moveToPositionInRevolutions(caselocations[green][0]);
+        stepper2.moveToPositionInRevolutions(caselocations[green][1]);
+        red++;
+      }
+      gripper();
+  }
 
-  home1();
   
-  for (int i = 0; i <= 8; i++) {
-    stepperLA.moveToPositionInMillimeters(zlocations[0]);
-    stepper1.moveToPositionInRevolutions(startlocations[i][0]);
-    stepper2.moveToPositionInRevolutions(startlocations[i][1]);
-    gripper();
-    stepper1.moveToPositionInRevolutions(safelocation[0]);
-    stepper2.moveToPositionInRevolutions(safelocation[1]);
-    //color();
-    if (color = 0){           // Blue
-      stepperLA.moveToPositionInMillimeters(caselocations[blue][2]);
-      stepper1.moveToPositionInRevolutions(caselocations[blue][0]);
-      stepper2.moveToPositionInRevolutions(caselocations[blue][1]);
-      blue++;
-    }
-    else if (color = 1){      // Red
-      stepperLA.moveToPositionInMillimeters(caselocations[red][2]);
-      stepper1.moveToPositionInRevolutions(caselocations[red][0]);
-      stepper2.moveToPositionInRevolutions(caselocations[red][1]);
-      red++;
-    }
-    else if(color = 2){       // Green
-      stepperLA.moveToPositionInMillimeters(caselocations[green][2]);
-      stepper1.moveToPositionInRevolutions(caselocations[green][0]);
-      stepper2.moveToPositionInRevolutions(caselocations[green][1]);
-      red++;
-    }
-    gripper();
+  
     
   }
 }
