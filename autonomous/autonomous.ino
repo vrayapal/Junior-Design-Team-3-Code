@@ -158,23 +158,27 @@ void limit(){               // limit switch function for limit switches. To add 
     }  
   limitSwitch2.loop();
   limit2 = limitSwitch2.getState();
-    if(limit2 == true )
+    if(limit2 == true ){
       limit2 = true;
       Serial.println("limit2 has been triggered");
       //code to scoot robot away from limit switch 
       //stepper1.moveRelativeInSteps(-20*4);
-    else if(limit2 == false)
+    }
+    else if(limit2 == false){
       limit2 = false;
+    }
 
   limitSwitch3.loop();
   limit3 = limitSwitch3.getState();
-    if(limit3 == true )
+    if(limit3 == true ){
       limit3 = true;
       Serial.println("limit2 has been triggered");
       //code scoot robot away from limit switch 
       //stepper2.moveRelativeInSteps(-20*4);
-    else if(limit3 == false)
+    }
+    else if(limit3 == false){
       limit3 = false;
+    }
 }
 
 void gripper(){   

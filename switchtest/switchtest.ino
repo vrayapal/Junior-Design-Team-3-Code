@@ -1,6 +1,9 @@
 #include <ezButton.h>
 
-ezButton limitSwitch(7);
+ezButton limitSwitch(25);
+
+bool limit = false;
+
 
 void setup() {
   Serial.begin(9600);
@@ -10,15 +13,15 @@ void setup() {
 void loop() {
   limitSwitch.loop();
 
-  if(limitSwitch.isReleased())
-    Serial.println("The limit switch: UNTOUCHED -> TOUCHED");
+  limit = limitSwitch.getState();
+    if(limit == true){
+      limit = true;
+      Serial.println(limit);
+    }
+    else if(limit == false){
+      limit = false;
+      Serial.println(limit);
 
-  if(limitSwitch.isPressed())
-    Serial.println("The limit switch: TOUCHED -> UNTOUCHED");
-
-  int state = limitSwitch.getState();
-  if(state == LOW)
-    Serial.println("The limit switch: UNTOUCHED");
-  else
-    Serial.println("The limit switch: TOUCHED");
+      //delay(100);
+    }
 }

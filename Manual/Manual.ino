@@ -74,8 +74,8 @@ SpeedyStepper stepper1;
 SpeedyStepper stepper2;
 
 void joystick() {
-  xPosition1 = (analogRead(x1Pin)-511);   // normalized x position from -1 to 1 for joystick 1
-  yPosition1 = (analogRead(y1Pin)-511);   // normalized y position from -1 to 1 for joystick 1
+  xPosition1 = analogRead(x1Pin)-511;   // normalized x position from -1 to 1 for joystick 1
+  yPosition1 = analogRead(y1Pin)-511;   // normalized y position from -1 to 1 for joystick 1
   buttonState1 = digitalRead(buttonPin1);
 
   xPosition2 = (analogRead(x2Pin)-511);   // normalized x position from -1 to 1 for joystick 2
@@ -84,19 +84,19 @@ void joystick() {
   
   // Debug Stuff
   if(buttonState1 == 0){
-    Serial.print("X: ");
+    Serial.print("X1: ");
     Serial.print(xPosition1);
-    Serial.print(" | Y: ");
+    Serial.print(" | Y1: ");
     Serial.print(yPosition1);
-    Serial.print(" | ButtonR: ");
+    Serial.print(" | ButtonL: ");
     Serial.println(buttonState1);
   }
   if(buttonState2 == 0){
-    Serial.print("X: ");
+    Serial.print("X2: ");
     Serial.print(xPosition2);
-    Serial.print(" | Y: ");
+    Serial.print(" | Y2: ");
     Serial.print(yPosition2);
-    Serial.print(" | ButtonL: ");
+    Serial.print(" | ButtonR: ");
     Serial.println(buttonState2);
   }
 }
@@ -125,29 +125,36 @@ void limit(){               // limit switch function for limit switches. To add 
   limit1 = limitSwitch1.getState();
     if(limit1 == true){
       limit1 = true;
-      //Serial.println(limit1);
     }
     else if(limit1 == false){
       limit1 = false;
-      //Serial.println(limit1);
-
+      Serial.println("Linear Axis 1 Limit Switch Triggered");
+      
       //delay(100);
     }  
   limitSwitch2.loop();
   limit2 = limitSwitch2.getState();
-    if(limit2 == true )
+    if(limit2 == true ){
       limit2 = true;
       //code to scoot robot away from limit switch 
-    else if(limit2 == false)
+      //Serial.println("RA1 Limit Switch Triggered");
+    }
+    else if(limit2 == false){
       limit2 = false;
+      Serial.println("RA1 Limit Switch Triggered");
+    } 
 
   limitSwitch3.loop();
   limit3 = limitSwitch3.getState();
-    if(limit3 == true )
+    if(limit3 == true ){
       limit3 = true;
+      //Serial.println("RA2 Limit Switch Triggered");
       //code scoot robot away from limit switch 
-    else if(limit3 == false)
+    }
+    else if(limit3 == false){
       limit3 = false;
+      Serial.println("RA2 Limit Switch Triggered");
+    }
 }
 
 void gripper(){   
@@ -305,37 +312,37 @@ void loop() {
       stepperLA.setAccelerationInStepsPerSecondPerSecond(10000);
       stepperLA.moveRelativeInSteps(50);
     }
-    if (xPosition2 >=100){
-        stepper1.setSpeedInStepsPerSecond(800);
-        stepper1.setAccelerationInStepsPerSecondPerSecond(10000);
-        stepper1.moveRelativeInSteps(-15);
+    if (xPosition2 >=100){ // RA1 4x microstepping
+        stepper1.setSpeedInStepsPerSecond(80*4);
+        stepper1.setAccelerationInStepsPerSecondPerSecond(1000*2);
+        stepper1.moveRelativeInSteps(-15*2);
         position = stepper1.getCurrentPositionInRevolutions();
         Serial.print("Position RA1: ");
         Serial.println(position);
         joystick();
       }
-    else if (xPosition2 <=-100){
-      stepper1.setSpeedInStepsPerSecond(80);
-      stepper1.setAccelerationInStepsPerSecondPerSecond(1000);
-      stepper1.moveRelativeInSteps(15);
+    else if (xPosition2 <=-100){ // RA1 4x microstepping
+      stepper1.setSpeedInStepsPerSecond(80*4);
+      stepper1.setAccelerationInStepsPerSecondPerSecond(1000*2);
+      stepper1.moveRelativeInSteps(15*2);
       position = stepper1.getCurrentPositionInRevolutions();
       Serial.print("Position RA1: ");
       Serial.println(position);
       joystick();
     }
-    if (yPosition2 >=100){
-      stepper2.setSpeedInStepsPerSecond(80*2);
+    if (yPosition2 >=100){ //RA2 8x microstepping
+      stepper2.setSpeedInStepsPerSecond(80*8);
       stepper2.setAccelerationInStepsPerSecondPerSecond(1000*2);
-      stepper2.moveRelativeInSteps(-15*4);
+      stepper2.moveRelativeInSteps(-15*2);
       position = stepper2.getCurrentPositionInRevolutions();
       Serial.print("Position RA2: ");
       Serial.println(position);
       joystick();
     }
-    else if (yPosition2 <=-100){
-      stepper2.setSpeedInStepsPerSecond(80*2);
+    else if (yPosition2 <=-100){ //RA2 8x microstepping
+      stepper2.setSpeedInStepsPerSecond(80*8);
       stepper2.setAccelerationInStepsPerSecondPerSecond(1000*2);
-      stepper2.moveRelativeInSteps(15*4);
+      stepper2.moveRelativeInSteps(15*2);
       position = stepper2.getCurrentPositionInRevolutions();
       Serial.print("Position RA2: ");
       Serial.println(position);
