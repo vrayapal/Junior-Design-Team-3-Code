@@ -1,13 +1,17 @@
 #include <Servo.h>
 #include <ezButton.h>
 #include <SpeedyStepper.h>
+#include "SparkFun_OPT4048.h"
+#include <Wire.h>
+
+SparkFun_OPT4048 myColor;
 
 ezButton limitSwitch1(23); // Limit 1
 ezButton limitSwitch2(25); // Limit 2
 ezButton limitSwitch3(27); // Limit 3
 
-ezButton limitSwitchL(33); // Button 1 Left  // G-> Digital; Y-> 5V; S-> GND
-ezButton limitSwitchR(29); // Button 2 Right // G-> Digital; Y-> 5V; S-> GND
+ezButton limitSwitchL(29); // Button 1 Left  // G-> Digital; Y-> 5V; S-> GND
+ezButton limitSwitchR(33); // Button 2 Right // G-> Digital; Y-> 5V; S-> GND
 
 int d=0;
 
@@ -29,11 +33,11 @@ bool RightButton = false;
 
 // Gripper Variables
 Servo gripper_servo;
-int gripper_pos = 80;        // variable for servo position
-bool gripper_state = false; // Initializes in the open state
-int gripper_closed = -20;     // servo value at which the servo is closed 
+int gripper_pos = 180;        // variable for servo position
+bool gripper_state = true; // Initializes in the open state
+int gripper_closed = 105;     // servo value at which the servo is closed 
 int speed = 8; // smaller is faster
-int gripper_open = 120;      // servo value at which the servo is closed
+int gripper_open = 180;      // servo value at which the servo is closed
 int color = 0;              // Initialises variable to hold the color value fromt eh color sensor
 
 // Joystick 1 Variables
@@ -209,7 +213,7 @@ void homeLA (){
   stepperLA.setStepsPerMillimeter(40 * 4);
   stepperLA.setSpeedInMillimetersPerSecond(26);
   stepperLA.setAccelerationInMillimetersPerSecondPerSecond(50.0);
-  stepperLA.moveToPositionInMillimeters(-5.0*10);
+  stepperLA.moveToPositionInMillimeters(-2.0*10);
   //delay(5000);
 }
 
@@ -239,7 +243,7 @@ void home1 (){
   stepper2.setSpeedInStepsPerSecond(400*4);
   stepper2.setAccelerationInStepsPerSecondPerSecond(800*2);
   stepper2.moveRelativeInSteps(-20*4);
-  delay(5000);
+  //delay(5000);
 }
 
 void setup() {
@@ -271,6 +275,12 @@ void setup() {
   //stepper23.setStepsPerMillimeter(40 * 1);
   //stepper23.setSpeedInMillimetersPerSecond(30.0);
   //stepper23.setAccelerationInMillimetersPerSecondPerSecond(25.0);
+  /*Wire.begin();
+    if (!myColor.begin()) {
+        Serial.println("OPT4048 not detected- check wiring or that your I2C address is correct!");
+        while (1) ;
+    }
+    myColor.setBasicSetup();*/
 }
 
 void loop() {
@@ -285,34 +295,50 @@ void loop() {
 
   stepperLA.setSpeedInMillimetersPerSecond(10.0);
   stepperLA.setAccelerationInMillimetersPerSecondPerSecond(10.0);
+  stepper1.setStepsPerRevolution(800);
+  stepper2.setStepsPerRevolution(1600);
+  Serial.println("Hello World");
+
   
   homeLA();
 
   home1();
+
+  //stepperLA.moveToPositionInMillimeters(-135);
+  //stepper1.moveToPositionInRevolutions(-0.74);
+  //stepper2.moveToPositionInRevolutions(-1.04);
   
   while(true){
     limit();
     joystick();
     buttons();
     if (LeftButton == false){
+      Serial.println("Left Button");
       gripper_state=false;
       gripper();
     }
     else if (RightButton == false){
+      Serial.println("Right Button");
       gripper_state=true;
       gripper();
     }
-    if (yPosition1 >=100){
+    if (yPosition1 >=200){
       stepperLA.setSpeedInStepsPerSecond(8000);
       stepperLA.setAccelerationInStepsPerSecondPerSecond(10000);
-      stepperLA.moveRelativeInSteps(-50);
+      stepperLA.moveRelativeInSteps(-100);
+      position = stepperLA.getCurrentPositionInMillimeters();
+      Serial.print("Position PA1: ");
+      Serial.println(position);
     }
-    else if (yPosition1 <=-100){
+    else if (yPosition1 <=-200){
       stepperLA.setSpeedInStepsPerSecond(8000);
       stepperLA.setAccelerationInStepsPerSecondPerSecond(10000);
-      stepperLA.moveRelativeInSteps(50);
+      stepperLA.moveRelativeInSteps(100);
+      position = stepperLA.getCurrentPositionInMillimeters();
+      Serial.print("Position PA1: ");
+      Serial.println(position);
     }
-    if (xPosition2 >=100){ // RA1 4x microstepping
+    if (xPosition2 <=-200){ // RA1 4x microstepping
         stepper1.setSpeedInStepsPerSecond(80*4);
         stepper1.setAccelerationInStepsPerSecondPerSecond(1000*2);
         stepper1.moveRelativeInSteps(-15*2);
@@ -321,7 +347,7 @@ void loop() {
         Serial.println(position);
         joystick();
       }
-    else if (xPosition2 <=-100){ // RA1 4x microstepping
+    else if (xPosition2 >=200){ // RA1 4x microstepping
       stepper1.setSpeedInStepsPerSecond(80*4);
       stepper1.setAccelerationInStepsPerSecondPerSecond(1000*2);
       stepper1.moveRelativeInSteps(15*2);
@@ -330,7 +356,7 @@ void loop() {
       Serial.println(position);
       joystick();
     }
-    if (yPosition2 >=100){ //RA2 8x microstepping
+    if (yPosition2 >=200){ //RA2 8x microstepping
       stepper2.setSpeedInStepsPerSecond(80*8);
       stepper2.setAccelerationInStepsPerSecondPerSecond(1000*2);
       stepper2.moveRelativeInSteps(-15*2);
@@ -339,7 +365,7 @@ void loop() {
       Serial.println(position);
       joystick();
     }
-    else if (yPosition2 <=-100){ //RA2 8x microstepping
+    else if (yPosition2 <=-200){ //RA2 8x microstepping
       stepper2.setSpeedInStepsPerSecond(80*8);
       stepper2.setAccelerationInStepsPerSecondPerSecond(1000*2);
       stepper2.moveRelativeInSteps(15*2);

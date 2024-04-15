@@ -1,6 +1,6 @@
 #include <ezButton.h>
 
-ezButton limitSwitch(25);
+ezButton limitSwitch(33);
 
 bool limit = false;
 
