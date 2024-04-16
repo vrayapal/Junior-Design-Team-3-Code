@@ -3,6 +3,7 @@
 #include <SpeedyStepper.h>
 #include "SparkFun_OPT4048.h"
 #include <Wire.h>
+#include <Math.h>
 
 SparkFun_OPT4048 myColor;
 
@@ -77,6 +78,15 @@ SpeedyStepper stepperLA;
 SpeedyStepper stepper1;
 SpeedyStepper stepper2;
 
+double x = 7.0;
+double y = 7.0;
+double theta1 = 60.0;
+double theta2 = -30.0;
+const double L1 = 5.0;
+const double L2 = 4.5;
+
+double increment = 0.125;
+
 void joystick() {
   xPosition1 = analogRead(x1Pin)-511;   // normalized x position from -1 to 1 for joystick 1
   yPosition1 = analogRead(y1Pin)-511;   // normalized y position from -1 to 1 for joystick 1
@@ -133,7 +143,7 @@ void limit(){               // limit switch function for limit switches. To add 
     else if(limit1 == false){
       limit1 = false;
       Serial.println("Linear Axis 1 Limit Switch Triggered");
-      stepperLA.moveRelativeInSteps(-100);
+      
       //delay(100);
     }  
   limitSwitch2.loop();
@@ -146,7 +156,6 @@ void limit(){               // limit switch function for limit switches. To add 
     else if(limit2 == false){
       limit2 = false;
       Serial.println("RA1 Limit Switch Triggered");
-      stepper1.moveRelativeInSteps(-15*2);
     } 
 
   limitSwitch3.loop();
@@ -159,7 +168,6 @@ void limit(){               // limit switch function for limit switches. To add 
     else if(limit3 == false){
       limit3 = false;
       Serial.println("RA2 Limit Switch Triggered");
-      stepper2.moveRelativeInSteps(-15*2);
     }
 }
 
@@ -246,6 +254,23 @@ void home1 (){
   stepper2.setAccelerationInStepsPerSecondPerSecond(800*2);
   stepper2.moveRelativeInSteps(-20*4);
   //delay(5000);
+  
+  //stepper1.moveToPositionInRevolutions(0.25);
+  //stepper2.moveToPositionInRevolutions(0.25);
+
+  //stepper1.setCurrentPositionInRevolutions(1.0);
+  //stepper2.setCurrentPositionInRevolutions(1.0);
+}
+
+void kinematics (){
+  float pi = 3.141592659;
+  theta2 = acos(((x*x) + (y*y) - (L1*L1) - (L2*L2)) / (2.0*L1*L2));
+  theta1 = atan2(y,x)-atan((L2*sin(-theta2))/(L1+L2*cos(-theta2)));
+  theta2 = (theta2/(2.0*pi))*4.0;
+  theta1 = (theta2/(2.0*pi))*4.0;
+  
+  //stepper1.moveToPositionInRevolutions(theta1);
+  //stepper2.moveToPositionInRevolutions(theta2);
 }
 
 void setup() {
@@ -273,10 +298,6 @@ void setup() {
   stepper2.connectToPins(MOTOR2_STEP_PIN, MOTOR2_DIRECTION_PIN);
   pinMode(ENA_PIN, OUTPUT);
 
-
-  //stepper23.setStepsPerMillimeter(40 * 1);
-  //stepper23.setSpeedInMillimetersPerSecond(30.0);
-  //stepper23.setAccelerationInMillimetersPerSecondPerSecond(25.0);
   /*Wire.begin();
     if (!myColor.begin()) {
         Serial.println("OPT4048 not detected- check wiring or that your I2C address is correct!");
@@ -302,13 +323,16 @@ void loop() {
   Serial.println("Hello World");
 
   
-  //homeLA();
+  homeLA();
 
-  //home1();
+  home1();
 
   //stepperLA.moveToPositionInMillimeters(-135);
   //stepper1.moveToPositionInRevolutions(-0.74);
   //stepper2.moveToPositionInRevolutions(-1.04);
+  
+  stepperLA.setSpeedInStepsPerSecond(8000);
+  stepperLA.setAccelerationInStepsPerSecondPerSecond(10000);
   
   while(true){
     limit();
@@ -325,56 +349,32 @@ void loop() {
       gripper();
     }
     if (yPosition1 >=200){
-      stepperLA.setSpeedInStepsPerSecond(8000);
-      stepperLA.setAccelerationInStepsPerSecondPerSecond(10000);
       stepperLA.moveRelativeInSteps(-100);
       position = stepperLA.getCurrentPositionInMillimeters();
       Serial.print("Position PA1: ");
       Serial.println(position);
     }
     else if (yPosition1 <=-200){
-      stepperLA.setSpeedInStepsPerSecond(8000);
-      stepperLA.setAccelerationInStepsPerSecondPerSecond(10000);
       stepperLA.moveRelativeInSteps(100);
       position = stepperLA.getCurrentPositionInMillimeters();
       Serial.print("Position PA1: ");
       Serial.println(position);
     }
     if (xPosition2 <=-200){ // RA1 4x microstepping
-        stepper1.setSpeedInStepsPerSecond(80*4);
-        stepper1.setAccelerationInStepsPerSecondPerSecond(1000*2);
-        stepper1.moveRelativeInSteps(-15*2);
-        position = stepper1.getCurrentPositionInRevolutions();
-        Serial.print("Position RA1: ");
-        Serial.println(position);
-        joystick();
-      }
+        y = x-increment;
+        kinematics();
+    }
     else if (xPosition2 >=200){ // RA1 4x microstepping
-      stepper1.setSpeedInStepsPerSecond(80*4);
-      stepper1.setAccelerationInStepsPerSecondPerSecond(1000*2);
-      stepper1.moveRelativeInSteps(15*2);
-      position = stepper1.getCurrentPositionInRevolutions();
-      Serial.print("Position RA1: ");
-      Serial.println(position);
-      joystick();
+      y = x+increment;
+      kinematics();
     }
     if (yPosition2 >=200){ //RA2 8x microstepping
-      stepper2.setSpeedInStepsPerSecond(80*8);
-      stepper2.setAccelerationInStepsPerSecondPerSecond(1000*2);
-      stepper2.moveRelativeInSteps(-15*2);
-      position = stepper2.getCurrentPositionInRevolutions();
-      Serial.print("Position RA2: ");
-      Serial.println(position);
-      joystick();
+      x = x+increment;
+      kinematics();
     }
     else if (yPosition2 <=-200){ //RA2 8x microstepping
-      stepper2.setSpeedInStepsPerSecond(80*8);
-      stepper2.setAccelerationInStepsPerSecondPerSecond(1000*2);
-      stepper2.moveRelativeInSteps(15*2);
-      position = stepper2.getCurrentPositionInRevolutions();
-      Serial.print("Position RA2: ");
-      Serial.println(position);
-      joystick();
+      x = x-increment;
+      kinematics();
     }
   }
 }
