@@ -14,7 +14,7 @@ void setup() {
 }
 
 void loop() {
-  for (pos = min; pos <= max; pos += 1) { 
+  /*for (pos = min; pos <= max; pos += 1) { 
     myservo.write(pos);
     Serial.println(pos);
     delay(speed);
@@ -25,6 +25,6 @@ void loop() {
     delay(speed);
     if(pos==min)
       delay(2000);
-  }
-  //myservo.write(150);
+  }*/
+  myservo.write(30);
 }

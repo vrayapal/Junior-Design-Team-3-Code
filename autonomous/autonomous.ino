@@ -29,11 +29,11 @@ bool RightButton = false;
 
 // Gripper Variables
 Servo gripper_servo;
-int gripper_pos = 180;        // variable for servo position
+int gripper_pos = 110;        // variable for servo position
 bool gripper_state = false; // Initializes in the open state
-int gripper_closed = 105;     // servo value at which the servo is closed 
+int gripper_closed = 1;     // servo value at which the servo is closed 
 int speed = 8; // smaller is faster
-int gripper_open = 180;      // servo value at which the servo is closed
+int gripper_open = 120;      // servo value at which the servo is closed
 int color = 0;              // Initialises variable to hold the color value fromt eh color sensor
 
 // Joystick 1 Variables
@@ -101,12 +101,12 @@ int red = 3;
 int green = 6;
 
 float safelocation[3][2] = {
-  {-0.74, -0.95},
+  {-0.21, -0.14},
   {-0.44, -0.59},
-  {-0.21, -0.14}
+  {-0.74, -0.95}
   };    //    {"RA1 position","RA2 Position"} at the safe position
 
-int zlocations[4] = {-24, -135, -260, -389}; // {tower position, }
+int zlocations[4] = {-5.63, -135, -260, -389}; // {tower position, }
 
 void joystick() {
   xPosition1 = (analogRead(x1Pin)-511);   // normalized x position from -1 to 1 for joystick 1
@@ -139,19 +139,24 @@ void joystick() {
 void buttons() {
   limitSwitchL.loop();
   int L = limitSwitchL.getState();
-  if(L == LOW)
+  if(L == LOW){
     LeftButton = false;
-    Serial.println("Left Button Triggered");
-  if (L == HIGH)
-     LeftButton = true;
+  }
+  if (L == HIGH){
+    LeftButton = true;
+    //Serial.println("Left Button Triggered");
+  }
   
   limitSwitchR.loop();
   int R = limitSwitchR.getState();
-  if(R == LOW)
+  if(R == LOW){
     RightButton = false;
-    Serial.println("Right Button Triggered");
-  if (R == HIGH)
-     RightButton = true;
+  }
+    
+  if (R == HIGH){
+    RightButton = true;
+    //Serial.println("Right Button Triggered");
+  }
 }
 
 void limit(){               // limit switch function for limit switches. To add more add another limit do the following: add a block in this function; intialize 'limit4' above; set debounce time in setup
@@ -185,7 +190,7 @@ void limit(){               // limit switch function for limit switches. To add 
   limit3 = limitSwitch3.getState();
     if(limit3 == true ){
       limit3 = true;
-      Serial.println("limit2 has been triggered");
+      Serial.println("limit3 has been triggered");
       //code scoot robot away from limit switch 
       //stepper2.moveRelativeInSteps(-20*4);
     }
@@ -290,6 +295,9 @@ void home1 (){
 }
 
 void safe() {
+  stepper2.moveToPositionInRevolutions(safelocation[height][1]/2.0);
+  stepper1.moveToPositionInRevolutions(safelocation[height][0]/2.0);
+  
   stepper1.moveToPositionInRevolutions(safelocation[height][0]);
   stepper2.moveToPositionInRevolutions(safelocation[height][1]);
   Serial.print("Moved to safe Position: ");
@@ -363,14 +371,21 @@ void loop() {
     if (LeftButton == false){
       for (int i = 0; i <= 8; i++) {
         // Open Gripper
+        Serial.print("Loop Iteration: ");
+        Serial.println(i);
         gripper_state=true;
         gripper();
         //Move to pick up location
-        stepperLA.moveToPositionInMillimeters(zlocations[0]);
+        stepperLA.moveToPositionInMillimeters(-93.75);
+
         stepper1.moveToPositionInRevolutions(startlocations[i][0]/2.0);
         stepper2.moveToPositionInRevolutions(startlocations[i][1]/2.0);
+        
         stepper1.moveToPositionInRevolutions(startlocations[i][0]);
         stepper2.moveToPositionInRevolutions(startlocations[i][1]);
+
+        stepperLA.moveToPositionInMillimeters(zlocations[0]);
+
         Serial.println("Pick up location");
         //wait
         delay(2500);
@@ -381,28 +396,43 @@ void loop() {
         //find color
         //checkcolor();
         
-        if (color = 0){           // Blue
+        if (color == 0){           // Blue
           Serial.println("Grabbed block is blue");
           height = b;
+          Serial.print("Case height: ");
+          Serial.println(height);
+
+          stepperLA.moveToPositionInMillimeters(-93.75);
+
           stepper2.moveToPositionInRevolutions(safelocation[b][1]/2.0);
-          stepper1.moveToPositionInRevolutions(caselocations[b][0]/2.0);
+          stepper1.moveToPositionInRevolutions(safelocation[b][0]/2.0);
           stepper2.moveToPositionInRevolutions(safelocation[b][1]);
-          stepper1.moveToPositionInRevolutions(caselocations[b][0]);
-          
+          stepper1.moveToPositionInRevolutions(safelocation[b][0]);
+          Serial.println("Moved to safe location");
+          delay(5000);
+          stepperLA.moveToPositionInMillimeters(caselocations[blue][2]);
+          Serial.println("Moved to safe location");
           stepper2.moveToPositionInRevolutions(caselocations[blue][1]/2.0);
           stepper1.moveToPositionInRevolutions(caselocations[blue][0]/2.0);
           stepper2.moveToPositionInRevolutions(caselocations[blue][1]);
           stepper1.moveToPositionInRevolutions(caselocations[blue][0]);
-          stepperLA.moveToPositionInMillimeters(caselocations[blue][2]);
-          safe();
+
+          gripper_state=false;
+          gripper();
+          
+          stepper2.moveToPositionInRevolutions(safelocation[b][1]);
+          stepper1.moveToPositionInRevolutions(safelocation[b][0]);
+          
           blue++;
           b++;
           
         }
-        else if (color = 1){      // Red
-          Serial.println("Grabbed block is blue");
+        else if (color == 1){      // Red
+          Serial.println("Grabbed block is red");
           height = r;
           safe();
+          Serial.println("SAFE SAFE SAFE");
+          delay(5000);
           stepperLA.moveToPositionInMillimeters(caselocations[red][2]/2.0);
           stepper2.moveToPositionInRevolutions(caselocations[red][1]/2.0);
           stepper1.moveToPositionInRevolutions(caselocations[red][0]/2.0);
@@ -415,8 +445,8 @@ void loop() {
           red++;
           r++;
         }
-        else if(color = 2){       // Green
-          Serial.println("Grabbed block is blue");
+        else if(color == 2){       // Green
+          Serial.println("Grabbed block is green");
           height = g;
           safe();
           stepperLA.moveToPositionInMillimeters(caselocations[green][2]/2.0);
