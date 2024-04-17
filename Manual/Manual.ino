@@ -35,9 +35,9 @@ bool RightButton = false;
 Servo gripper_servo;
 int gripper_pos = 140;        // variable for servo position
 bool gripper_state = true; // Initializes in the open state
-int gripper_closed = 1;     // servo value at which the servo is closed 
+int gripper_closed = 40;     // servo value at which the servo is closed 
 int speed = 8; // smaller is faster
-int gripper_open = 140;      // servo value at which the servo is closed
+int gripper_open = 180;      // servo value at which the servo is closed
 int color = 0;              // Initialises variable to hold the color value fromt eh color sensor
 
 // Joystick 1 Variables
@@ -307,9 +307,9 @@ void loop() {
   home1();
 
   
-  stepper1.moveToPositionInRevolutions(-0.55);
-  stepper2.moveToPositionInRevolutions(-0.59);
-  stepperLA.moveToPositionInMillimeters(-5.63);
+  //stepper1.moveToPositionInRevolutions(-0.55);
+  //stepper2.moveToPositionInRevolutions(-0.59);
+  //stepperLA.moveToPositionInMillimeters(-5.63);
   
   while(true){
     limit();

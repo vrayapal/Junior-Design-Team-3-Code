@@ -29,9 +29,9 @@ bool RightButton = false;
 Servo gripper_servo;
 int gripper_pos = 110;        // variable for servo position
 bool gripper_state = false; // Initializes in the open state
-int gripper_closed = 12;     // servo value at which the servo is closed 
+int gripper_closed = 50;     // servo value at which the servo is closed 
 int speed = 8; // smaller is faster
-int gripper_open = 130;      // servo value at which the servo is closed
+int gripper_open = 175;      // servo value at which the servo is closed
 int color = 0;              // Initialises variable to hold the color value fromt eh color sensor
 
 // Joystick 1 Variables
@@ -74,15 +74,15 @@ int zlocations[5] = {-5.63, -181.88, -307.51, -435.63, -58.76}; // {tower positi
 
 
 float startlocations[9][3] = {  //    {"RA1 position","RA2 Position","zlocation index"}
-  {-0.47, -0.46, -5.63},     // Tower 1a
-  {-0.55, -0.59, -5.63},    // Tower 1b
-  {-0.70, -0.8, -5.63},    // Tower 1c
-  {-0.63, -0.44, -5.63},    // Tower 2a
-  {-0.70, -0.57, -5.63},   // Tower 2b
-  {-0.81, -0.69, -5.63},   // Tower 2c
+  {-0.44, -0.46, -5.63},     // Tower 1a
+  {-0.55, -0.65, -5.63},    // Tower 1b
+  {-0.74, -0.84, -5.63},    // Tower 1c
+  {-0.63, -0.50, -5.63},    // Tower 2a
+  {-0.74, -0.63, -5.63},   // Tower 2b
+  {-0.81, -0.73, -5.63},   // Tower 2c
   {-0.77, -0.39, -5.63},   // Tower 3a
-  {-0.85, -0.48, -5.63},   // Tower 3b
-  {-0.93, -0.59, -5.63}   // Tower 3c
+  {-0.89, -0.56, -5.63},   // Tower 3b
+  {-0.93, -0.63, -5.63}   // Tower 3c
 };
 
 float caselocations[9][3] = {   //    {"RA1 position","RA2 Position","zlocation index"}
@@ -93,7 +93,7 @@ float caselocations[9][3] = {   //    {"RA1 position","RA2 Position","zlocation 
   {-0.74, -0.42, zlocations[2]},  // Red 5
   {-1.08, -0.81, zlocations[2]},  // Red 6
   {-0.66, 0.03, zlocations[1]},  // Green 7
-  {-0.74, -0.42, zlocations[1]},  // Green 8
+  {-0.74, -0.44, zlocations[1]},  // Green 8
   {-1.08, -0.81, zlocations[1]}   // Green 9
 };
 
@@ -403,7 +403,7 @@ void loop() {
   Serial.println("Homing RA 1 and 2");
 
   stepperLA.setStepsPerMillimeter(40 * 4); // times 4x microstepping
-  stepperLA.setSpeedInMillimetersPerSecond(22);
+  stepperLA.setSpeedInMillimetersPerSecond(23);
   stepperLA.setAccelerationInMillimetersPerSecondPerSecond(50.0);
   
   stepper1.setStepsPerRevolution(200*4); // times 8x microstepping
@@ -429,10 +429,11 @@ void loop() {
         //Move to pick up location
         stepperLA.moveToPositionInMillimeters(zlocations[4]);
 
-        stepper1.moveToPositionInRevolutions(startlocations[i][0]/2.0);
         stepper2.moveToPositionInRevolutions(startlocations[i][1]/2.0);
+        stepper1.moveToPositionInRevolutions(startlocations[i][0]/2.0);
         
-        if (i == 6 || i == 7 || i == 8 ||){
+        
+        if ((i == 6) || (i == 7) || (i == 8)){
           stepper1.moveToPositionInRevolutions(startlocations[i][0]);
           stepper2.moveToPositionInRevolutions(startlocations[i][1]);
         }

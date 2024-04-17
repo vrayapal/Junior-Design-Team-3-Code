@@ -4,9 +4,9 @@ Servo myservo;
 
 int pos = 20;
 
-int max = 130;
+int max = 180;
 ;
-int min = 12;
+int min = 50;
 int speed = 8; // smaller is faster
 
 void setup() {
@@ -27,5 +27,5 @@ void loop() {
     if(pos==min)
       delay(2000);
   }
-  //myservo.write(70);
+  myservo.write(70);
 }
