@@ -269,8 +269,8 @@ void kinematics (){
   theta2 = (theta2/(2.0*pi))*4.0;
   theta1 = (theta2/(2.0*pi))*4.0;
   
-  //stepper1.moveToPositionInRevolutions(theta1);
-  //stepper2.moveToPositionInRevolutions(theta2);
+  stepper1.moveToPositionInRevolutions(theta1);
+  stepper2.moveToPositionInRevolutions(theta2);
 }
 
 void setup() {

@@ -2,11 +2,12 @@
 
 Servo myservo;
 
-int pos = 100;
+int pos = 20;
 
-int max = 80;
-int min = -20;
-int speed = 15; // smaller is faster
+int max = 130;
+;
+int min = 12;
+int speed = 8; // smaller is faster
 
 void setup() {
   Serial.begin(9600);
@@ -14,7 +15,7 @@ void setup() {
 }
 
 void loop() {
-  /*for (pos = min; pos <= max; pos += 1) { 
+  for (pos = min; pos <= max; pos += 1) { 
     myservo.write(pos);
     Serial.println(pos);
     delay(speed);
@@ -25,6 +26,6 @@ void loop() {
     delay(speed);
     if(pos==min)
       delay(2000);
-  }*/
-  myservo.write(30);
+  }
+  //myservo.write(70);
 }

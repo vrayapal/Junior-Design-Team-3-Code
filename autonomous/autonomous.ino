@@ -1,10 +1,8 @@
 #include <Servo.h>
 #include <ezButton.h>
 #include <SpeedyStepper.h>
-#include "SparkFun_OPT4048.h"
 #include <Wire.h>
-
-SparkFun_OPT4048 myColor;
+#include <Adafruit_TCS34725.h>
 
 ezButton limitSwitch1(23); // Limit 1
 ezButton limitSwitch2(25); // Limit 2
@@ -31,9 +29,9 @@ bool RightButton = false;
 Servo gripper_servo;
 int gripper_pos = 110;        // variable for servo position
 bool gripper_state = false; // Initializes in the open state
-int gripper_closed = 1;     // servo value at which the servo is closed 
+int gripper_closed = 12;     // servo value at which the servo is closed 
 int speed = 8; // smaller is faster
-int gripper_open = 120;      // servo value at which the servo is closed
+int gripper_open = 130;      // servo value at which the servo is closed
 int color = 0;              // Initialises variable to hold the color value fromt eh color sensor
 
 // Joystick 1 Variables
@@ -72,28 +70,31 @@ SpeedyStepper stepperLA;
 SpeedyStepper stepper1;
 SpeedyStepper stepper2;
 
+int zlocations[5] = {-5.63, -181.88, -307.51, -435.63, -58.76}; // {tower position, }
+
+
 float startlocations[9][3] = {  //    {"RA1 position","RA2 Position","zlocation index"}
-  {-0.85, -1.10, -24},     // Tower 1a
-  {-0.85, -1.10, -24},    // Tower 1b
-  {-0.85, -1.10, -24},    // Tower 1c
-  {-0.85, -1.10, -24},    // Tower 2a
-  {-0.85, -1.10, -24},   // Tower 2b
-  {-0.85, -1.10, -24},   // Tower 2c
-  {-0.85, -1.10, -24},   // Tower 3a
-  {-0.85, -1.10, -24},   // Tower 3b
-  {-0.85, -1.10, -24}   // Tower 3c
+  {-0.47, -0.46, -5.63},     // Tower 1a
+  {-0.55, -0.59, -5.63},    // Tower 1b
+  {-0.70, -0.8, -5.63},    // Tower 1c
+  {-0.63, -0.44, -5.63},    // Tower 2a
+  {-0.70, -0.57, -5.63},   // Tower 2b
+  {-0.81, -0.69, -5.63},   // Tower 2c
+  {-0.77, -0.39, -5.63},   // Tower 3a
+  {-0.85, -0.48, -5.63},   // Tower 3b
+  {-0.93, -0.59, -5.63}   // Tower 3c
 };
 
 float caselocations[9][3] = {   //    {"RA1 position","RA2 Position","zlocation index"}
-  {-0.55, -0.07, -389},  // Blue 1
-  {-0.63, -0.50, -389},  // Blue 2
-  {-1.04, -0.95, -389},  // Blue 3
-  {-0.55, -0.07, -260},  // Red 4
-  {-0.63, -0.50, -260},  // Red 5
-  {-1.04, -0.95, -260},  // Red 6
-  {-0.55, -0.07, -135},  // Green 7
-  {-0.63, -0.50, -135},  // Green 8
-  {-1.04, -0.95, -135}   // Green 9
+  {-0.66, 0.03, zlocations[3]},  // Blue 1
+  {-0.74, -0.42, zlocations[3]},  // Blue 2
+  {-1.08, -0.81, zlocations[3]},  // Blue 3
+  {-0.66, 0.03, zlocations[2]},  // Red 4
+  {-0.74, -0.42, zlocations[2]},  // Red 5
+  {-1.08, -0.81, zlocations[2]},  // Red 6
+  {-0.66, 0.03, zlocations[1]},  // Green 7
+  {-0.74, -0.42, zlocations[1]},  // Green 8
+  {-1.08, -0.81, zlocations[1]}   // Green 9
 };
 
 int blue = 0;
@@ -101,12 +102,39 @@ int red = 3;
 int green = 6;
 
 float safelocation[3][2] = {
-  {-0.21, -0.14},
-  {-0.44, -0.59},
-  {-0.74, -0.95}
+  {-0.32, 0.03},
+  {-0.44, -0.42},
+  {-0.74, -0.81}
   };    //    {"RA1 position","RA2 Position"} at the safe position
 
-int zlocations[4] = {-5.63, -135, -260, -389}; // {tower position, }
+Adafruit_TCS34725 tcs = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_50MS, TCS34725_GAIN_4X);
+
+double hue, saturation, lighting, value;
+
+float fract(float x) { return x - int(x); }
+
+float mix(float a, float b, float t) { return a + (b - a) * t; }
+
+float step(float e, float x) { return x < e ? 0.0 : 1.0; }
+
+float hsv[3];
+
+float* rgb2hsv(float r, float g, float b, float* hsv) {
+  float s = step(b, g);
+  float px = mix(b, g, s);
+  float py = mix(g, b, s);
+  float pz = mix(-1.0, 0.0, s);
+  float pw = mix(0.6666666, -0.3333333, s);
+  s = step(px, r);
+  float qx = mix(px, r, s);
+  float qz = mix(pw, pz, s);
+  float qw = mix(r, px, s);
+  float d = qx - min(qw, py);
+  hsv[0] = abs(qz + (qw - py) / (6.0 * d + 1e-10));
+  hsv[1] = d / (qx + 1e-10);
+  hsv[2] = qx;
+  return hsv;
+}
 
 void joystick() {
   xPosition1 = (analogRead(x1Pin)-511);   // normalized x position from -1 to 1 for joystick 1
@@ -227,20 +255,43 @@ void gripper(){
 
 
 void checkcolor(){
-  if ((myColor.getCIEy()>= 0.20) && (myColor.getCIEy()<= 0.35) && (myColor.getCIEx()>= 0.35) && (myColor.getCIEx()<= 0.50)){
+  float red, green, blue;
+  tcs.setInterrupt(false);  // turn on LED
+  delay(60);  // takes 50ms to read
+  tcs.getRGB(&red, &green, &blue);
+ 
+  //Serial.print("R:\t"); Serial.print(int(red));
+  //Serial.print("\tG:\t"); Serial.print(int(green));
+  //Serial.print("\tB:\t"); Serial.print(int(blue));
+
+  rgb2hsv(red, green, blue, hsv);
+  /*
+  Serial.print("H:\t");     Serial.print(hsv[0]);
+  Serial.print("\tS:\t");   Serial.print(hsv[1]);
+  Serial.print("\tV:\t");   Serial.println(hsv[2]);
+  */
+
+  if ((hsv[0]>= 0.33) && (hsv[0]<= 0.6) && (hsv[1]>= 0.1) && (hsv[1]<= 0.50) && (hsv[2]>= 90.0) && (hsv[2]<= 110.0)){
     color=0;
     Serial.println("Block is Blue");
   }
-  else if ((myColor.getCIEx()>= 0.55) && (myColor.getCIEx()<= 0.70) && (myColor.getCIEy()>= 0.25) && (myColor.getCIEy()<= 0.35)){
+  else if ((hsv[0]>= 0.0) && (hsv[0]<= 0.1) && (hsv[1]>= 0.45) && (hsv[1]<= 0.80) && (hsv[2]>= 110.0) && (hsv[2]<= 190.0)){
     color=1;
     Serial.println("Block is Red");
   }
-  else if ((myColor.getCIEx()>= 0.35) && (myColor.getCIEx()<= 0.55) && (myColor.getCIEy()>= 0.36) && (myColor.getCIEy()<= 0.50)){
+  else if ((hsv[0]>= 0.25) && (hsv[0]<= 0.34) && (hsv[1]>= 0.31) && (hsv[1]<= 0.50) && (hsv[2]>= 100.0) && (hsv[2]<= 125.0)){
     color=2;
     Serial.println("Block is Green");
   }
   else {
     Serial.println("Failed color check");
+    Serial.print("H:\t");     Serial.print(hsv[0]);
+    Serial.print("\tS:\t");   Serial.print(hsv[1]);
+    Serial.print("\tV:\t");   Serial.println(hsv[2]);
+    gripper_state=true;
+    gripper();
+    gripper_state=false;
+    gripper();
     checkcolor();
 
   }
@@ -329,12 +380,12 @@ void setup() {
   stepper2.connectToPins(MOTOR2_STEP_PIN, MOTOR2_DIRECTION_PIN);
   pinMode(ENA_PIN, OUTPUT);
 
-  Wire.begin();
-    if (!myColor.begin()) {
-        Serial.println("OPT4048 not detected- check wiring or that your I2C address is correct!");
-        while (1) ;
-    }
-  myColor.setBasicSetup();
+  if (tcs.begin()) {
+    Serial.println("Found color sensor");
+  } else {
+    Serial.println("No TCS34725 found ... check your connections");
+    while (1); // halt!
+  }
 }
 
 void loop() {
@@ -376,25 +427,35 @@ void loop() {
         gripper_state=true;
         gripper();
         //Move to pick up location
-        stepperLA.moveToPositionInMillimeters(-93.75);
+        stepperLA.moveToPositionInMillimeters(zlocations[4]);
 
         stepper1.moveToPositionInRevolutions(startlocations[i][0]/2.0);
         stepper2.moveToPositionInRevolutions(startlocations[i][1]/2.0);
         
-        stepper1.moveToPositionInRevolutions(startlocations[i][0]);
-        stepper2.moveToPositionInRevolutions(startlocations[i][1]);
+        if (i == 6 || i == 7 || i == 8 ||){
+          stepper1.moveToPositionInRevolutions(startlocations[i][0]);
+          stepper2.moveToPositionInRevolutions(startlocations[i][1]);
+        }
+        else{
+          stepper2.moveToPositionInRevolutions(startlocations[i][1]);
+          stepper1.moveToPositionInRevolutions(startlocations[i][0]);
+        }
 
         stepperLA.moveToPositionInMillimeters(zlocations[0]);
 
         Serial.println("Pick up location");
         //wait
-        delay(2500);
+        delay(1000);
+        //find color
+        checkcolor();
+
         //close gripper
         gripper_state=false;
         gripper();
-        delay(2500);
-        //find color
-        //checkcolor();
+        //delay(1000);
+        stepper2.moveRelativeInRevolutions(0.05);
+        stepper1.moveRelativeInRevolutions(0.2);
+        stepperLA.moveToPositionInMillimeters(zlocations[4]);
         
         if (color == 0){           // Blue
           Serial.println("Grabbed block is blue");
@@ -402,67 +463,126 @@ void loop() {
           Serial.print("Case height: ");
           Serial.println(height);
 
-          stepperLA.moveToPositionInMillimeters(-93.75);
-
-          stepper2.moveToPositionInRevolutions(safelocation[b][1]/2.0);
-          stepper1.moveToPositionInRevolutions(safelocation[b][0]/2.0);
-          stepper2.moveToPositionInRevolutions(safelocation[b][1]);
-          stepper1.moveToPositionInRevolutions(safelocation[b][0]);
-          Serial.println("Moved to safe location");
-          delay(5000);
+          //b=2;
+          if(b!=2){
+            stepper2.moveToPositionInRevolutions(safelocation[b][1]/2.0);
+            stepper1.moveToPositionInRevolutions(safelocation[b][0]/2.0);
+            stepper2.moveToPositionInRevolutions(safelocation[b][1]);
+            stepper1.moveToPositionInRevolutions(safelocation[b][0]);
+            Serial.println("Moved to safe location");
+            //delay(1000);
+          }
+          else {
+            //stepper2.moveToPositionInRevolutions(safelocation[b][1]/2.0);
+            Serial.println("Test 1");
+            delay(1000);
+            stepper1.moveToPositionInRevolutions(safelocation[b][0]/2.0);
+            Serial.println("Test 2");
+            delay(1000);
+            stepper1.moveToPositionInRevolutions(safelocation[b][0]);
+            Serial.println("Test 3");
+            delay(1000);
+            stepper2.moveToPositionInRevolutions(safelocation[b][1]);
+            Serial.println("Test 4");
+            delay(1000);
+            
+          }
+          
           stepperLA.moveToPositionInMillimeters(caselocations[blue][2]);
-          Serial.println("Moved to safe location");
-          stepper2.moveToPositionInRevolutions(caselocations[blue][1]/2.0);
-          stepper1.moveToPositionInRevolutions(caselocations[blue][0]/2.0);
+
           stepper2.moveToPositionInRevolutions(caselocations[blue][1]);
           stepper1.moveToPositionInRevolutions(caselocations[blue][0]);
 
-          gripper_state=false;
+          gripper_state=true;
           gripper();
+          
           
           stepper2.moveToPositionInRevolutions(safelocation[b][1]);
           stepper1.moveToPositionInRevolutions(safelocation[b][0]);
           
           blue++;
           b++;
-          
         }
         else if (color == 1){      // Red
           Serial.println("Grabbed block is red");
           height = r;
-          safe();
-          Serial.println("SAFE SAFE SAFE");
-          delay(5000);
-          stepperLA.moveToPositionInMillimeters(caselocations[red][2]/2.0);
-          stepper2.moveToPositionInRevolutions(caselocations[red][1]/2.0);
-          stepper1.moveToPositionInRevolutions(caselocations[red][0]/2.0);
+          Serial.print("Case height: ");
+          Serial.println(height);
+
+          if(r!=2){
+            stepper2.moveToPositionInRevolutions(safelocation[r][1]/2.0);
+            stepper1.moveToPositionInRevolutions(safelocation[r][0]/2.0);
+            stepper2.moveToPositionInRevolutions(safelocation[r][1]);
+            stepper1.moveToPositionInRevolutions(safelocation[r][0]);
+            Serial.println("Moved to safe location");
+            //delay(1000);
+            Serial.println("Moved to safe location");
+            //delay(5000);
+          }
+          else {
+            //stepper2.moveToPositionInRevolutions(safelocation[r][1]/2.0);
+            stepper1.moveToPositionInRevolutions(safelocation[r][0]/2.0);
+            Serial.println("Test 2");
+            delay(1000);
+            stepper1.moveToPositionInRevolutions(safelocation[b][0]);
+            Serial.println("Test 3");
+            delay(1000);
+            stepper2.moveToPositionInRevolutions(safelocation[b][1]);
+            
+          }
+
+          
+          
           stepperLA.moveToPositionInMillimeters(caselocations[red][2]);
+
           stepper2.moveToPositionInRevolutions(caselocations[red][1]);
           stepper1.moveToPositionInRevolutions(caselocations[red][0]);
-          gripper_state=false;
+
+          gripper_state=true;
           gripper();
-          safe();
+          
+          stepper2.moveToPositionInRevolutions(safelocation[r][1]);
+          stepper1.moveToPositionInRevolutions(safelocation[r][0]);
+          
           red++;
           r++;
         }
         else if(color == 2){       // Green
           Serial.println("Grabbed block is green");
           height = g;
-          safe();
-          stepperLA.moveToPositionInMillimeters(caselocations[green][2]/2.0);
-          stepper1.moveToPositionInRevolutions(caselocations[green][0]/2.0);
-          stepper2.moveToPositionInRevolutions(caselocations[green][1]/2.0);
+          Serial.print("Case height: ");
+          Serial.println(height);
+          
+          if(g!=2){
+            stepper2.moveToPositionInRevolutions(safelocation[g][1]/2.0);
+            stepper1.moveToPositionInRevolutions(safelocation[g][0]/2.0);
+            stepper2.moveToPositionInRevolutions(safelocation[g][1]);
+            stepper1.moveToPositionInRevolutions(safelocation[g][0]);
+            Serial.println("Moved to safe location");
+            //delay(5000);
+          }
+          else {
+            //stepper2.moveToPositionInRevolutions(safelocation[g][1]/2.0);
+            stepper1.moveToPositionInRevolutions(safelocation[g][0]/2.0);
+            stepper1.moveToPositionInRevolutions(safelocation[g][0]);
+            stepper2.moveToPositionInRevolutions(safelocation[g][1]);
+          }
+          
           stepperLA.moveToPositionInMillimeters(caselocations[green][2]);
-          stepper1.moveToPositionInRevolutions(caselocations[green][0]);
+
           stepper2.moveToPositionInRevolutions(caselocations[green][1]);
-          gripper_state=false;
+          stepper1.moveToPositionInRevolutions(caselocations[green][0]);
+
+          gripper_state=true;
           gripper();
-          safe();
+          
+          
+          stepper2.moveToPositionInRevolutions(safelocation[g][1]);
+          stepper1.moveToPositionInRevolutions(safelocation[g][0]);
+          
           green++;
           g++;
         }
-
-
       }
     }
   }

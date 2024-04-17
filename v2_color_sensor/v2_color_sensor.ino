@@ -49,13 +49,31 @@ void loop() {
   delay(60);  // takes 50ms to read
   tcs.getRGB(&red, &green, &blue);
  
-  Serial.print("R:\t"); Serial.print(int(red));
-  Serial.print("\tG:\t"); Serial.print(int(green));
-  Serial.print("\tB:\t"); Serial.print(int(blue));
+  //Serial.print("R:\t"); Serial.print(int(red));
+  //Serial.print("\tG:\t"); Serial.print(int(green));
+  //Serial.print("\tB:\t"); Serial.print(int(blue));
 
   rgb2hsv(red, green, blue, hsv);
- 
+  
   Serial.print("H:\t");     Serial.print(hsv[0]);
   Serial.print("\tS:\t");   Serial.print(hsv[1]);
-  Serial.print("\tV:\t");   Serial.print(hsv[2]);
+  Serial.print("\tV:\t");   Serial.println(hsv[2]);
+  
+  int color=0;
+
+  if ((hsv[0]>= 0.33) && (hsv[0]<= 0.6) && (hsv[1]>= 0.2) && (hsv[1]<= 0.50) && (hsv[2]>= 90.0) && (hsv[2]<= 110.0)){
+    color=0;
+    Serial.println("Block is Blue");
+  }
+  else if ((hsv[0]>= 0.0) && (hsv[0]<= 0.1) && (hsv[1]>= 0.45) && (hsv[1]<= 0.80) && (hsv[2]>= 110.0) && (hsv[2]<= 190.0)){
+    color=1;
+    Serial.println("Block is Red");
+  }
+  else if ((hsv[0]>= 0.25) && (hsv[0]<= 0.34) && (hsv[1]>= 0.31) && (hsv[1]<= 0.50) && (hsv[2]>= 100.0) && (hsv[2]<= 125.0)){
+    color=2;
+    Serial.println("Block is Green");
+  }
+  else {
+    Serial.println("Failed color check");
+  }
 }
