@@ -61,15 +61,15 @@ void loop() {
   
   int color=0;
 
-  if ((hsv[0]>= 0.33) && (hsv[0]<= 0.6) && (hsv[1]>= 0.2) && (hsv[1]<= 0.50) && (hsv[2]>= 90.0) && (hsv[2]<= 110.0)){
-    color=0;
-    Serial.println("Block is Blue");
-  }
-  else if ((hsv[0]>= 0.0) && (hsv[0]<= 0.1) && (hsv[1]>= 0.45) && (hsv[1]<= 0.80) && (hsv[2]>= 110.0) && (hsv[2]<= 190.0)){
+  if ((hsv[0]>= 0.0) && (hsv[0]<= 0.1) && (hsv[1]>= 0.36) && (hsv[1]<= 0.80) && (hsv[2]>= 100.0) && (hsv[2]<= 190.0)){
     color=1;
     Serial.println("Block is Red");
   }
-  else if ((hsv[0]>= 0.25) && (hsv[0]<= 0.34) && (hsv[1]>= 0.31) && (hsv[1]<= 0.50) && (hsv[2]>= 100.0) && (hsv[2]<= 125.0)){
+  else if ((hsv[0]>= 0.2) && (hsv[0]<= 0.6) && (hsv[1]>= 0.10) && (hsv[1]<= 0.30) && (hsv[2]>= 90.0) && (hsv[2]<= 98.0)){
+    color=0;
+    Serial.println("Block is Blue");
+  }
+  else if ((hsv[0]>= 0.10) && (hsv[0]<= 0.25) && (hsv[1]>= 0.33) && (hsv[1]<= 0.60) && (hsv[2]>= 95.0) && (hsv[2]<= 115.0)){
     color=2;
     Serial.println("Block is Green");
   }
