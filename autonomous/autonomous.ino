@@ -276,14 +276,23 @@ void checkcolor(){
   if ((hsv[0]>= 0.0) && (hsv[0]<= 0.1) && (hsv[1]>= 0.36) && (hsv[1]<= 0.80) && (hsv[2]>= 100.0) && (hsv[2]<= 190.0)){
     color=1;
     Serial.println("Block is Red");
+    Serial.print("H:\t");     Serial.print(hsv[0]);
+    Serial.print("\tS:\t");   Serial.print(hsv[1]);
+    Serial.print("\tV:\t");   Serial.println(hsv[2]);
   }
   else if ((hsv[0]>= 0.2) && (hsv[0]<= 0.6) && (hsv[1]>= 0.10) && (hsv[1]<= 0.30) && (hsv[2]>= 90.0) && (hsv[2]<= 105.0)){
     color=0;
     Serial.println("Block is Blue");
+    Serial.print("H:\t");     Serial.print(hsv[0]);
+    Serial.print("\tS:\t");   Serial.print(hsv[1]);
+    Serial.print("\tV:\t");   Serial.println(hsv[2]);
   }
   else if ((hsv[0]>= 0.10) && (hsv[0]<= 0.25) && (hsv[1]>= 0.33) && (hsv[1]<= 0.60) && (hsv[2]>= 95.0) && (hsv[2]<= 115.0)){
     color=2;
     Serial.println("Block is Green");
+    Serial.print("H:\t");     Serial.print(hsv[0]);
+    Serial.print("\tS:\t");   Serial.print(hsv[1]);
+    Serial.print("\tV:\t");   Serial.println(hsv[2]);
   }
   else {
     Serial.println("Failed color check");
@@ -315,7 +324,7 @@ void homeLA (){
   stepperLA.moveToHomeInMillimeters(directionTowardHome, homingSpeedInMMPerSec, maxHomingDistanceInMM, 23);
 
   stepperLA.setStepsPerMillimeter(40 * 4);
-  stepperLA.setSpeedInMillimetersPerSecond(26);
+  stepperLA.setSpeedInMillimetersPerSecond(26.5);
   stepperLA.setAccelerationInMillimetersPerSecondPerSecond(50.0);
   stepperLA.moveToPositionInMillimeters(-2.0*10);
   //delay(5000);
@@ -416,11 +425,11 @@ void loop() {
   stepperLA.setAccelerationInMillimetersPerSecondPerSecond(50.0);
   
   stepper1.setStepsPerRevolution(200*4); // times 8x microstepping
-  stepper1.setSpeedInRevolutionsPerSecond(1.25);
+  stepper1.setSpeedInRevolutionsPerSecond(1.5);
   stepper1.setAccelerationInRevolutionsPerSecondPerSecond(1.0);
 
   stepper2.setStepsPerRevolution(200*8); // times 8x microstepping
-  stepper2.setSpeedInRevolutionsPerSecond(1.25);
+  stepper2.setSpeedInRevolutionsPerSecond(1.5);
   stepper2.setAccelerationInRevolutionsPerSecondPerSecond(1.0);
   
   gripper_state=true;
@@ -462,7 +471,14 @@ void loop() {
         }
 
         stepperLA.moveToPositionInMillimeters(zlocations[0]);
-
+        
+        if (i==0){
+          while(true){
+            buttons();
+            if (RightButton == false){ break;}
+          }
+        }
+        
         Serial.println("Pick up location");
         //wait
         delay(1000);
@@ -494,17 +510,17 @@ void loop() {
           }
           else {
             //stepper2.moveToPositionInRevolutions(safelocation[b][1]/2.0);
-            Serial.println("Test 1");
-            delay(1000);
+            //Serial.println("Test 1");
+            //delay(1000);
             stepper1.moveToPositionInRevolutions(safelocation[b][0]/2.0);
-            Serial.println("Test 2");
-            delay(1000);
+            //Serial.println("Test 2");
+            //delay(1000);
             stepper1.moveToPositionInRevolutions(safelocation[b][0]);
-            Serial.println("Test 3");
-            delay(1000);
+            //Serial.println("Test 3");
+            //delay(1000);
             stepper2.moveToPositionInRevolutions(safelocation[b][1]);
-            Serial.println("Test 4");
-            delay(1000);
+            //Serial.println("Test 4");
+            //delay(1000);
             
           }
           
@@ -542,8 +558,8 @@ void loop() {
           else {
             //stepper2.moveToPositionInRevolutions(safelocation[r][1]/2.0);
             stepper1.moveToPositionInRevolutions(safelocation[r][0]/2.0);
-            stepper1.moveToPositionInRevolutions(safelocation[b][0]);
-            stepper2.moveToPositionInRevolutions(safelocation[b][1]);
+            stepper1.moveToPositionInRevolutions(safelocation[r][0]);
+            stepper2.moveToPositionInRevolutions(safelocation[r][1]);
           }
 
           stepperLA.moveToPositionInMillimeters(caselocations[red][2]);

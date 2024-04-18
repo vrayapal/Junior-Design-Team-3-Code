@@ -295,22 +295,27 @@ void loop() {
   joystick();
   buttons();
 
-  stepperLA.setSpeedInMillimetersPerSecond(10.0);
+  stepperLA.setSpeedInMillimetersPerSecond(20.0);
   stepperLA.setAccelerationInMillimetersPerSecondPerSecond(10.0);
   stepper1.setStepsPerRevolution(800);
   stepper2.setStepsPerRevolution(1600);
   Serial.println("Hello World");
 
   
-  homeLA();
+  //homeLA();
 
-  home1();
+  //home1();
 
   
   //stepper1.moveToPositionInRevolutions(-1.08);
   //stepper2.moveToPositionInRevolutions(-1.07);
   //stepperLA.moveToPositionInMillimeters(-307.51);
   
+  stepperLA.setStepsPerMillimeter(40 * 4); // times 4x microstepping
+  stepperLA.setSpeedInMillimetersPerSecond(29);
+  stepperLA.setAccelerationInMillimetersPerSecondPerSecond(70.0);
+
+
   while(true){
     limit();
     joystick();
@@ -326,25 +331,35 @@ void loop() {
       gripper();
     }
     if (yPosition1 >=200){
-      stepperLA.setSpeedInStepsPerSecond(8000);
-      stepperLA.setAccelerationInStepsPerSecondPerSecond(10000);
-      stepperLA.moveRelativeInSteps(-200);
+      stepperLA.setupMoveInMillimeters(-90);
+      stepperLA.processMovement();
+      while (!stepperLA.processMovement()) {
+        joystick();
+        stepperLA.setupStop();
+        if (yPosition1 < 200) {break;}
+      }
       position = stepperLA.getCurrentPositionInMillimeters();
+      Serial.print("Speed");
       Serial.print("Position PA1: ");
       Serial.println(position);
     }
-    else if (yPosition1 <=-200){
-      stepperLA.setSpeedInStepsPerSecond(8000);
-      stepperLA.setAccelerationInStepsPerSecondPerSecond(10000);
-      stepperLA.moveRelativeInSteps(200);
+    if (yPosition1 <=-200){
+      stepperLA.setupMoveInMillimeters(90);
+      stepperLA.processMovement();
+      while (!stepperLA.processMovement()) {
+        joystick();
+        stepperLA.setupStop();
+        if (yPosition1 > -200) {break;}
+      }
       position = stepperLA.getCurrentPositionInMillimeters();
+      Serial.print("Speed");
       Serial.print("Position PA1: ");
       Serial.println(position);
     }
     if (xPosition2 <=-200){ // RA1 4x microstepping
         stepper1.setSpeedInStepsPerSecond(80*4);
         stepper1.setAccelerationInStepsPerSecondPerSecond(1000*2);
-        stepper1.moveRelativeInSteps(-15);
+        stepper1.moveRelativeInSteps(-35);
         position = stepper1.getCurrentPositionInRevolutions();
         Serial.print("Position RA1: ");
         Serial.println(position);
@@ -353,7 +368,7 @@ void loop() {
     else if (xPosition2 >=200){ // RA1 4x microstepping
       stepper1.setSpeedInStepsPerSecond(80*4);
       stepper1.setAccelerationInStepsPerSecondPerSecond(1000*2);
-      stepper1.moveRelativeInSteps(15);
+      stepper1.moveRelativeInSteps(35);
       position = stepper1.getCurrentPositionInRevolutions();
       Serial.print("Position RA1: ");
       Serial.println(position);
@@ -362,7 +377,7 @@ void loop() {
     if (yPosition2 >=200){ //RA2 8x microstepping
       stepper2.setSpeedInStepsPerSecond(80*8);
       stepper2.setAccelerationInStepsPerSecondPerSecond(1000*2);
-      stepper2.moveRelativeInSteps(-15);
+      stepper2.moveRelativeInSteps(-15*3);
       position = stepper2.getCurrentPositionInRevolutions();
       Serial.print("Position RA2: ");
       Serial.println(position);
@@ -371,7 +386,7 @@ void loop() {
     else if (yPosition2 <=-200){ //RA2 8x microstepping
       stepper2.setSpeedInStepsPerSecond(80*8);
       stepper2.setAccelerationInStepsPerSecondPerSecond(1000*2);
-      stepper2.moveRelativeInSteps(15);
+      stepper2.moveRelativeInSteps(15*3);
       position = stepper2.getCurrentPositionInRevolutions();
       Serial.print("Position RA2: ");
       Serial.println(position);
