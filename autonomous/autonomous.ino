@@ -72,19 +72,19 @@ SpeedyStepper stepperLA;
 SpeedyStepper stepper1;
 SpeedyStepper stepper2;
 
-int zlocations[5] = {-5.63, -181.88, -307.51, -435.63, -70.01}; // {tower position, }
+int zlocations[5] = {-5.63, -181.88, -307.51, -435.63, -69.85}; // {tower position, }
 
 
 float startlocations[9][3] = {  //    {"RA1 position","RA2 Position","zlocation index"}
-  {-0.46, -0.56, -5.63},     // Tower 1a
-  {-0.55, -0.70, -5.63},    // Tower 1b
-  {-0.70, -0.88, -5.63},    // Tower 1c
-  {-0.63, -0.56, -5.63},    // Tower 2a
-  {-0.74, -0.71, -5.63},   // Tower 2b
-  {-0.81, -0.79, -5.63},   // Tower 2c
-  {-0.81, -0.48, -5.63},   // Tower 3a
-  {-0.87, -0.57, -5.63},   // Tower 3b
-  {-0.94, -0.67, -5.63}   // Tower 3c
+  {-0.46, -0.56, -5.54},     // Tower 1a
+  {-0.55, -0.70, -5.54},    // Tower 1b
+  {-0.70, -0.88, -5.54},    // Tower 1c
+  {-0.63, -0.56, -5.54},    // Tower 2a
+  {-0.74, -0.71, -5.54},   // Tower 2b
+  {-0.81, -0.79, -5.54},   // Tower 2c
+  {-0.81, -0.48, -5.54},   // Tower 3a
+  {-0.87, -0.57, -5.54},   // Tower 3b
+  {-0.94, -0.67, -5.54}   // Tower 3c
 };
 
 float caselocations[9][3] = {   //    {"RA1 position","RA2 Position","zlocation index"}
@@ -432,6 +432,10 @@ void loop() {
   stepper2.setSpeedInRevolutionsPerSecond(1.5);
   stepper2.setAccelerationInRevolutionsPerSecondPerSecond(1.0);
   
+  gripper_state=true;
+  gripper();
+  gripper_state=false;
+  gripper();
   gripper_state=true;
   gripper();
   

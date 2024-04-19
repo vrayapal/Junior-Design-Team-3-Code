@@ -33,11 +33,11 @@ bool RightButton = false;
 
 // Gripper Variables
 Servo gripper_servo;
-int gripper_pos = 180;        // variable for servo position
-bool gripper_state = true; // Initializes in the open state
-int gripper_closed = 40;     // servo value at which the servo is closed 
+int gripper_pos = 60;        // variable for servo position
+bool gripper_state = false; // Initializes in the open state
+int gripper_closed = 30;     // servo value at which the servo is closed 
 int speed = 8; // smaller is faster
-int gripper_open = 180;      // servo value at which the servo is closed
+int gripper_open = 130;      // servo value at which the servo is closed
 int color = 0;              // Initialises variable to hold the color value fromt eh color sensor
 
 // Joystick 1 Variables
@@ -356,7 +356,7 @@ void loop() {
       Serial.print("Position PA1: ");
       Serial.println(position);
     }
-    if (xPosition2 <=-200){ // RA1 4x microstepping
+    if (xPosition2 <=-300){ // RA1 4x microstepping
         stepper1.setSpeedInStepsPerSecond(80*4);
         stepper1.setAccelerationInStepsPerSecondPerSecond(1000*2);
         stepper1.moveRelativeInSteps(-35);
@@ -365,7 +365,7 @@ void loop() {
         Serial.println(position);
         joystick();
       }
-    else if (xPosition2 >=200){ // RA1 4x microstepping
+    else if (xPosition2 >=300){ // RA1 4x microstepping
       stepper1.setSpeedInStepsPerSecond(80*4);
       stepper1.setAccelerationInStepsPerSecondPerSecond(1000*2);
       stepper1.moveRelativeInSteps(35);
@@ -374,7 +374,7 @@ void loop() {
       Serial.println(position);
       joystick();
     }
-    if (yPosition2 >=200){ //RA2 8x microstepping
+    if (yPosition2 >=300){ //RA2 8x microstepping
       stepper2.setSpeedInStepsPerSecond(80*8);
       stepper2.setAccelerationInStepsPerSecondPerSecond(1000*2);
       stepper2.moveRelativeInSteps(-15*3);
@@ -383,7 +383,7 @@ void loop() {
       Serial.println(position);
       joystick();
     }
-    else if (yPosition2 <=-200){ //RA2 8x microstepping
+    else if (yPosition2 <=-300){ //RA2 8x microstepping
       stepper2.setSpeedInStepsPerSecond(80*8);
       stepper2.setAccelerationInStepsPerSecondPerSecond(1000*2);
       stepper2.moveRelativeInSteps(15*3);
